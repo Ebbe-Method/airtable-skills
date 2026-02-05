@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "airtable": {
+      "command": "npx",
+      "args": ["-y", "@airtable/mcp-server"],
+      "env": {
+        "AIRTABLE_PAT": "${AIRTABLE_PAT}"
+      }
+    }
+  }
+}

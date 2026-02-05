@@ -1,6 +1,6 @@
 {
     "name": "airtable",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "description": "Comprehensive Airtable assistant for schema design, API interactions, scripting, interfaces, and automations.",
     "author": {
         "name": "Rob Weidner"
@@ -10,6 +10,9 @@
         "database",
         "no-code",
         "automation",
-        "scripting"
-    ]
+        "scripting",
+        "cowork"
+    ],
+    "homepage": "https://github.com/robweidner/airtable-skills",
+    "repository": "https://github.com/robweidner/airtable-skills"
 }

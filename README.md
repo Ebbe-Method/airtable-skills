@@ -3,7 +3,7 @@
 > Turn Claude into an Airtable expert — schema design, scripting, automations, interfaces, and API integrations.
 
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-6366f1)](https://claude.ai/code)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue)](https://github.com/robweidner/airtable-skills/releases)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue)](https://github.com/robweidner/airtable-skills/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ## What's Included
@@ -12,21 +12,29 @@
 |-------|---------|--------------|
 | **airtable** | Auto-invokes on Airtable work | Full Airtable assistant — schema, scripts, automations, interfaces, API |
 | **airtable-extensions** | `/airtable-extensions` | Custom React extensions (Blocks SDK) |
+| **airtable-field-audit** | `/airtable-field-audit` | Find and fix field naming issues — duplicates, whitespace, similar names |
 
 ## Quick Start
 
 ### Installation
 
-**Via Plugin Marketplace (Recommended):**
+**Claude Code (CLI):**
 ```bash
 /plugin marketplace add robweidner/airtable-skills
 ```
+
+**Claude Cowork (Web):**
+1. Visit [claude.com/plugins](https://claude.com/plugins/)
+2. Search for "Airtable"
+3. Click Install
 
 **Manual Clone:**
 ```bash
 cd ~/.claude/plugins
 git clone https://github.com/robweidner/airtable-skills.git airtable
 ```
+
+> **Note:** This plugin includes an `.mcp.json` that auto-configures the Airtable MCP server. Just set your `AIRTABLE_PAT` environment variable.
 
 ### Setup Your Token
 
