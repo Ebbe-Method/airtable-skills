@@ -186,17 +186,48 @@ If you have the Airtable MCP configured, the skill prefers it over REST API. Wor
 
 ## Contributing
 
-Contributions welcome:
+This plugin belongs to the community. Here's how you can get involved:
+
+### Improve This Plugin
+
+Fork it, make it better, and submit a PR:
 
 - **Add scripting patterns** — `examples/scripting-patterns.md`
 - **Update API docs** — as Airtable changes
 - **New automation templates** — `reference/automations.md`
 - **Bug fixes and improvements**
 
+### Build Your Own Skills
+
+The best part of Claude Code skills? **You can create your own.**
+
+1. Fork this repo as a starting point
+2. Modify the skills in `skills/` to match your workflow
+3. Add new skills for your specific Airtable use cases
+4. Keep it private or share it back with the community
+
+**Pro tip:** Ask Claude to help you write skills. Literally just say:
+
+```
+Help me create a Claude Code skill for [your use case]
+```
+
+Claude understands the skill format and can generate new skills, modify existing ones, or help you debug issues. You don't need to be a developer — Claude can guide you through the entire process.
+
+### Skill Ideas We'd Love to See
+
+- Industry-specific templates (CRM, inventory, project management)
+- Data migration helpers
+- Sync patterns with other tools
+- Reporting and analytics scripts
+- Custom interface components
+
+If you build something cool, share it! Open a PR or create your own plugin.
+
 ## License
 
-MIT
+MIT — Use it, fork it, build on it.
 
 ---
 
-**Built by [Rob Weidner](https://github.com/robweidner)** — Contributions and feedback welcome!
+**Built by [Rob Weidner](https://github.com/robweidner)** — This is a community project. Make it yours.
