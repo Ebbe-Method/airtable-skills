@@ -3,7 +3,7 @@
 > Turn Claude into an Airtable expert — schema design, scripting, automations, interfaces, and API integrations.
 
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-6366f1)](https://claude.ai/code)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue)](https://github.com/robweidner/airtable-skills/releases)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue)](https://github.com/robweidner/airtable-skills/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ## What's Included
@@ -13,6 +13,7 @@
 | **airtable** | Auto-invokes on Airtable work | Full Airtable assistant — schema, scripts, automations, interfaces, API |
 | **airtable-extensions** | `/airtable-extensions` | Custom React extensions (Blocks SDK) |
 | **airtable-field-audit** | `/airtable-field-audit` | Find and fix field naming issues — duplicates, whitespace, similar names |
+| **airtable-base-audit** | `/airtable-base-audit` | Comprehensive base health analysis — field usage, performance, schema quality |
 
 ## Quick Start
 

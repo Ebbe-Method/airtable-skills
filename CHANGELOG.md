@@ -2,6 +2,18 @@
 
 All notable changes to the Airtable Skills plugin.
 
+## [1.3.0] - 2026-02-05
+
+### Added
+
+- **New skill: `/airtable-base-audit`** - Comprehensive base health analysis
+  - Field Health (~35%): Unused fields, low fill rates, "(copy)" fields, uniqueness analysis
+  - Performance (~35%): Record count vs plan limits, TODAY() formula detection, complex formulas
+  - Schema Quality (~30%): Repeated data patterns, missing relationships, denormalization
+  - Letter grade (A-F) scoring with percentage breakdown
+  - Three output modes: apply safe fixes, export report, detailed recommendations
+  - Plan-aware limits (Teams/Business/Enterprise)
+
 ## [1.2.0] - 2026-02-05
 
 ### Added
