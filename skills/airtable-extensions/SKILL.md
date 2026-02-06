@@ -234,3 +234,83 @@ try {
 4. **Global config limits** - 50KB total. Don't store large data in global config.
 
 5. **No server-side** - Extensions are client-only. For server operations, use Airtable Automations or external webhooks.
+
+---
+
+## Interface Extensions (Alpha SDK)
+
+The newer Interface Extensions SDK has different patterns. Use `@airtable/blocks: interface-alpha` in package.json.
+
+### Key Differences from Blocks SDK
+
+```jsx
+// Interface Extensions SDK uses different import path!
+import { initializeBlock, useBase, useRecords } from '@airtable/blocks/interface/ui';
+
+// NOT this (old Blocks SDK):
+// import { useBase, useRecords } from '@airtable/blocks/ui';
+```
+
+### Interface Extensions Troubleshooting
+
+#### "Field does not exist" Error
+
+**Problem:** `Error: Field 'fldXXX' does not exist in table 'TableName'`
+
+**Cause:** Interface Extensions require you to explicitly enable tables AND fields in the interface Data settings.
+
+**Solution:**
+1. Open the interface in edit mode
+2. Look at the right panel → **Data** section
+3. Click the gear icon next to **Table**
+4. Enable all tables your extension uses
+5. For each table, click the gear icon next to **Fields**
+6. Enable all fields your code references (by ID or name)
+
+**Important:** Even if a field exists in the base, your extension can't access it unless it's enabled in the interface Data settings.
+
+#### "FORBIDDEN - Can only run in original base" Error
+
+**Problem:** `You can only run your development block in the original base where it was created.`
+
+**Cause:** The dev server (`block run`) is tied to the specific base ID in `.block/remote.json`.
+
+**Solution:**
+- Run the dev server while viewing the **original base** where you initialized the extension
+- OR use the **published release** (click "Stop" on development panel) which works in any base
+
+#### Best Practice: Use Field IDs, Not Names
+
+Field names can change. Field IDs are stable. Always use IDs in production code:
+
+```javascript
+// constants.js - Store field IDs
+export const FIELD_IDS = {
+  EVENTS: {
+    NAME: 'fldb43P9bv3dqKPVO',
+    STATUS: 'fldyXuvmxMH8av5J9',
+  },
+};
+
+// helpers.js - Use IDs in data access
+export function mapRecordToEvent(record) {
+  return {
+    id: record.id,
+    name: record.getCellValueAsString(FIELD_IDS.EVENTS.NAME),
+    status: record.getCellValue(FIELD_IDS.EVENTS.STATUS)?.name ?? 'Upcoming',
+  };
+}
+```
+
+#### Publishing Releases
+
+```bash
+# Publish with a release comment
+echo "Description of changes" | npx block release
+
+# Or interactively
+npx block release
+# Then enter your comment when prompted
+```
+
+After publishing, users see the released version. Stop the dev server to test the published version yourself.
