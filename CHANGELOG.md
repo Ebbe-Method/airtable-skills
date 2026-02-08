@@ -2,6 +2,15 @@
 
 All notable changes to the Airtable Skills plugin.
 
+## [1.4.0] - 2026-02-08
+
+### Added
+
+- **Auto-release on git push** - New Claude Code hook recipe in the `airtable-extensions` skill that automatically runs `block release` after every `git push`, keeping your Airtable extension in sync with your GitHub repo
+  - PostToolUse hook detects `git push` commands scoped to your extension repo
+  - Skips release if the push failed
+  - Step-by-step setup instructions included in the skill
+
 ## [1.3.0] - 2026-02-05
 
 ### Added
