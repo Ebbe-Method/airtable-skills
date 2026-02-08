@@ -18,27 +18,30 @@ Claude Code (CLI):
 /plugin install airtable@robweidner-airtable
 ```
 
-Manual clone:
+For development/testing (load without installing):
 ```bash
-cd ~/.claude/plugins
-git clone https://github.com/robweidner/airtable-skills.git airtable
+git clone https://github.com/robweidner/airtable-skills.git
+claude --plugin-dir ./airtable-skills/plugins/airtable
 ```
 
 ### MCP setup expectation
 The plugin ships `plugins/airtable/.mcp.json`, which expects an environment variable:
 ```bash
-AIRTABLE_PAT=patXXXXXXXXXXXXXX
+export AIRTABLE_PAT=patXXXXXXXXXXXXXX
 ```
-(README suggests storing this in `.secrets.env` in the user’s environment.)
+This should be added to the user's shell profile (`~/.zshrc` or `~/.bashrc`).
 
-### “Build / lint / test”
+### "Build / lint / test"
 There are **no repo-provided** build, lint, or test commands/scripts.
 
 Practical validation commands used during edits:
 ```bash
 # Validate the plugin manifest and MCP config are valid JSON
-jq -e . plugins/airtable/plugin.json
+jq -e . plugins/airtable/.claude-plugin/plugin.json
 jq -e . plugins/airtable/.mcp.json
+
+# Full plugin validation (requires Claude Code)
+claude plugin validate .
 ```
 
 ## High-level architecture
@@ -48,7 +51,7 @@ jq -e . plugins/airtable/.mcp.json
 - `docs/emoji-naming-conventions.md`: team-specific emoji/naming guidance (separate from the skill’s `[emoji]` bracket system, but conceptually related).
 
 ### Plugin root
-- `plugins/airtable/plugin.json`: plugin manifest (name/version/metadata).
+- `plugins/airtable/.claude-plugin/plugin.json`: plugin manifest (name/version/metadata). **Must** be inside `.claude-plugin/` per Claude Code plugin spec.
 - `plugins/airtable/.mcp.json`: bundled MCP server configuration that runs `@airtable/mcp-server` via `npx` and passes through `AIRTABLE_PAT`.
 
 ### Skills layout
@@ -76,7 +79,7 @@ Key skills in this repo:
 ### Versioning / releases
 When making user-visible changes:
 - Bump **all three** version locations in lockstep:
-  - `plugins/airtable/plugin.json` → `version`
+  - `plugins/airtable/.claude-plugin/plugin.json` → `version`
   - `.claude-plugin/marketplace.json` → both `metadata.version` and `plugins[0].version`
   - `README.md` → version badge text
 - Add an entry to `CHANGELOG.md` (the repo uses dated headings like `## [1.5.0] - 2026-02-08`).

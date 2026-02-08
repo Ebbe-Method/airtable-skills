@@ -2,6 +2,38 @@
 
 All notable changes to the Airtable Skills plugin.
 
+## [1.5.0] - 2026-02-08
+
+### Added
+
+- **Interface Extensions deep-dive** - Major expansion of the `airtable-extensions` skill for interface extension development
+  - Data source configuration checklist: tables and fields must be explicitly enabled in the interface Data panel
+  - Diagnostic component pattern to verify what data your extension can access
+  - `block run` crash recovery workflow and common crash scenarios
+  - Chrome CORS troubleshooting for localhost dev server
+  - Multiple tables workaround using the REST API
+  - Omni as alternative entry point for quick prototyping
+  - Comprehensive error reference table with causes and fixes
+  - Full development checklist (setup → coding → release)
+- **New reference doc: `interface-extensions-workflow.md`** - Complete development lifecycle guide for interface extensions
+
+### Changed
+
+- Updated Interface Extensions section from "Alpha SDK" to "Open Beta SDK"
+- Added comparison table: Blocks SDK vs Interface Extensions SDK
+- Expanded troubleshooting from 2 errors to 10+ common issues
+
+### Fixed
+
+- **Moved `plugin.json` to correct location** — now at `plugins/airtable/.claude-plugin/plugin.json` per the [official plugin spec](https://code.claude.com/docs/en/plugins). Previously at `plugins/airtable/plugin.json` which may have prevented marketplace installation.
+- **Rewrote README Quick Start** — step-by-step numbered guide (Install → Token → Env Var → Verify → Preferences) replaces the previous abbreviated setup
+- **Fixed skill invocation syntax** — all slash commands now show correct namespaced format (`/airtable:airtable-extensions` instead of `/airtable-extensions`)
+- **Added prerequisites section** — Claude Code v1.0.33+, Node.js 18+ for MCP server
+- **Added verification step** — how to confirm the plugin is working after installation
+- **Added troubleshooting section** — common installation issues and fixes
+- **Replaced manual clone instructions** — now uses `--plugin-dir` flag for development/testing
+- **Clarified token setup** — explicit instructions for shell profile environment variable instead of ambiguous `.secrets.env`
+
 ## [1.4.0] - 2026-02-08
 
 ### Added

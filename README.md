@@ -8,62 +8,101 @@
 
 ## What's Included
 
-| Skill | Trigger | What It Does |
-|-------|---------|--------------|
-| **airtable** | Auto-invokes on Airtable work | Full Airtable assistant — schema, scripts, automations, interfaces, API |
-| **airtable-extensions** | `/airtable-extensions` | Custom React extensions — Blocks SDK + Interface Extensions SDK, dev server troubleshooting, auto-release hooks |
-| **airtable-field-audit** | `/airtable-field-audit` | Find and fix field naming issues — duplicates, whitespace, similar names |
-| **airtable-base-audit** | `/airtable-base-audit` | Comprehensive base health analysis — field usage, performance, schema quality |
+| Skill | How to Use | What It Does |
+|-------|-----------|--------------|
+| **airtable** | Auto-invokes when you mention Airtable | Full Airtable assistant — schema, scripts, automations, interfaces, API |
+| **airtable-extensions** | `/airtable:airtable-extensions` | Custom React extensions — Blocks SDK + Interface Extensions SDK, dev server troubleshooting, auto-release hooks |
+| **airtable-field-audit** | `/airtable:airtable-field-audit` | Find and fix field naming issues — duplicates, whitespace, similar names |
+| **airtable-base-audit** | `/airtable:airtable-base-audit` | Comprehensive base health analysis — field usage, performance, schema quality |
+
+> **How invocation works:** The main `airtable` skill activates automatically whenever you ask Claude about Airtable. The other three skills are slash commands you type manually. All slash commands are prefixed with `airtable:` because Claude Code namespaces plugin skills.
+
+## Prerequisites
+
+Before installing, make sure you have:
+
+- [ ] **Claude Code** installed and authenticated ([setup guide](https://code.claude.com/docs/en/quickstart))
+- [ ] **Claude Code v1.0.33+** — run `claude --version` to check. If below 1.0.33, update first.
+- [ ] **Node.js 18+** — required for the Airtable MCP server (`npx @airtable/mcp-server`)
+- [ ] **An Airtable account** with a Team, Business, or Enterprise plan (for extension development; schema/scripting works on any plan)
 
 ## Quick Start
 
-### Installation
+### Step 1: Install the Plugin
 
-**Claude Code (CLI):**
+**From a marketplace (recommended):**
+
 ```bash
-# Add the marketplace
+# In Claude Code, run these commands:
 /plugin marketplace add robweidner/airtable-skills
-
-# Install the plugin
 /plugin install airtable@robweidner-airtable
 ```
 
-**Claude Cowork (Web):**
-1. Visit [claude.com/plugins](https://claude.com/plugins/)
-2. Search for "Airtable"
-3. Click Install
+The first command registers the marketplace. The second installs the plugin. You only need to do this once.
 
-**Manual Clone:**
+**For development/testing (load without installing):**
+
 ```bash
-cd ~/.claude/plugins
-git clone https://github.com/robweidner/airtable-skills.git airtable
+# Clone the repo anywhere
+git clone https://github.com/robweidner/airtable-skills.git
+
+# Start Claude Code with the plugin loaded directly
+claude --plugin-dir ./airtable-skills/plugins/airtable
 ```
 
-> **Note:** This plugin includes an `.mcp.json` that auto-configures the Airtable MCP server. Just set your `AIRTABLE_PAT` environment variable.
+### Step 2: Create Your Airtable Token
 
-### Setup Your Token
+The plugin uses the Airtable MCP server, which needs a Personal Access Token (PAT) to talk to your bases.
 
 1. Go to [airtable.com/create/tokens](https://airtable.com/create/tokens)
-2. Create a scoped token for your project (don't use a global token)
-3. Select only the base(s) you need
-4. Add scopes: `data.records:read`, `data.records:write`, `schema.bases:read`, `schema.bases:write`
-5. Store in `.secrets.env`:
-   ```bash
-   AIRTABLE_PAT=patXXXXXXXXXXXXXX
-   ```
+2. Click **Create new token**
+3. Name it something like "Claude Code"
+4. **Scopes** — add these four:
+   - `data.records:read`
+   - `data.records:write`
+   - `schema.bases:read`
+   - `schema.bases:write`
+5. **Access** — select only the base(s) you're working with (don't grant access to all bases)
+6. Click **Create token** and copy it
 
-### First Use
+### Step 3: Set the Token as an Environment Variable
 
-The skill asks for your preferences on first run:
+Add this line to your shell profile (`~/.zshrc`, `~/.bashrc`, or `~/.bash_profile`):
 
-| Preference | Options | Description |
-|------------|---------|-------------|
-| Experience | `beginner` / `power-user` / `developer` | Controls explanation depth |
-| Emoji Mode | `auto` / `new-only` / `ask` / `none` | Field name emoji prefixes |
-| Script Style | `minimal` / `comprehensive` | Output data vs. all-in-one scripts |
-| Field IDs | `true` / `false` | Store IDs in descriptions for robust scripts |
+```bash
+export AIRTABLE_PAT="patXXXXXXXXXXXXXX"
+```
 
-Save to your `CLAUDE.md`:
+Then reload your shell:
+
+```bash
+source ~/.zshrc  # or ~/.bashrc
+```
+
+> **Why an environment variable?** The plugin's `.mcp.json` auto-configures the Airtable MCP server and reads `AIRTABLE_PAT` from your environment. No manual MCP setup needed.
+
+### Step 4: Verify It Works
+
+Start (or restart) Claude Code and try:
+
+```
+I have an Airtable base for tracking customer orders. Help me add a Status field with options: Pending, In Progress, Shipped, Delivered.
+```
+
+Claude should activate the Airtable skill automatically and guide you through it. You'll know it's working when Claude references Airtable-specific patterns like field types, API operations, or the MCP tools.
+
+To verify the slash commands work:
+
+```
+/airtable:airtable-field-audit
+```
+
+This should start the field audit workflow.
+
+### Step 5: Save Your Preferences (Optional)
+
+The skill adapts to your experience level. Add these to your `CLAUDE.md` (either `~/.claude/CLAUDE.md` for global, or `.claude/CLAUDE.md` in your project):
+
 ```markdown
 ## Airtable Preferences
 airtable_experience: developer
@@ -71,6 +110,13 @@ airtable_emoji_mode: auto
 airtable_script_style: minimal
 airtable_use_field_ids: true
 ```
+
+| Preference | Options | Description |
+|------------|---------|-------------|
+| Experience | `beginner` / `power-user` / `developer` | Controls explanation depth |
+| Emoji Mode | `auto` / `new-only` / `ask` / `none` | Field name emoji prefixes |
+| Script Style | `minimal` / `comprehensive` | Output data vs. all-in-one scripts |
+| Field IDs | `true` / `false` | Store IDs in descriptions for robust scripts |
 
 ## Capabilities
 
@@ -139,16 +185,26 @@ Set up an automation that sends Slack when a new order is created over $1000
 Design an interface for sales reps to manage their assigned leads
 ```
 
-**Extensions:**
+**Extensions** (slash command):
 ```
-/airtable-extensions
+/airtable:airtable-extensions
 Build a custom extension to visualize sales pipeline as a Kanban board
 ```
 
-**Interface Extensions:**
+**Interface Extensions troubleshooting** (slash command):
 ```
-/airtable-extensions
+/airtable:airtable-extensions
 I'm getting "Field does not exist" errors in my interface extension — help me debug it
+```
+
+**Field Audit** (slash command):
+```
+/airtable:airtable-field-audit
+```
+
+**Base Health Check** (slash command):
+```
+/airtable:airtable-base-audit
 ```
 
 ## Documentation
@@ -182,10 +238,6 @@ When `airtable_use_field_ids: true`, the skill:
 2. Uses IDs in scripts instead of names
 3. Your scripts survive field renames
 
-## Airtable MCP (Optional)
-
-If you have the Airtable MCP configured, the skill prefers it over REST API. Works fine without MCP — falls back to REST API with rate limiting.
-
 ## Common Gotchas
 
 | Issue | Solution |
@@ -195,8 +247,33 @@ If you have the Airtable MCP configured, the skill prefers it over REST API. Wor
 | Linked records fail | Create the linked table first |
 | Formula field not created | Use the `[convert]` workaround |
 | Rate limited | Skill handles this — uses exponential backoff |
-| Extension out of sync with repo | Set up the auto-release Claude Code hook (see `/airtable-extensions`) |
+| Extension out of sync with repo | Set up the auto-release Claude Code hook (see `/airtable:airtable-extensions`) |
 | `block run` won't connect in Chrome | Check CORS flags — see Interface Extensions troubleshooting |
+| MCP tools not available | Verify `AIRTABLE_PAT` is set: `echo $AIRTABLE_PAT` |
+| Slash commands not found | Use full namespaced name: `/airtable:airtable-extensions` |
+
+## Troubleshooting Installation
+
+**"Unknown command" when running `/plugin`:**
+Update Claude Code to v1.0.33+. Run `claude --version` to check.
+
+**MCP server not starting:**
+- Verify Node.js is installed: `node --version` (need 18+)
+- Verify token is set: `echo $AIRTABLE_PAT`
+- Restart Claude Code after setting the environment variable
+
+**Skills not appearing:**
+- Run `/plugin` and check the **Installed** tab — the `airtable` plugin should be listed
+- Check the **Errors** tab for any loading issues
+- Try clearing the cache: `rm -rf ~/.claude/plugins/cache`, restart Claude Code, and reinstall
+
+**Plugin validation** (for contributors):
+```bash
+cd /path/to/airtable-skills
+claude plugin validate .
+# Or from within Claude Code:
+/plugin validate .
+```
 
 ## Contributing
 

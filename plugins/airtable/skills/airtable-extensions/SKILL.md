@@ -92,6 +92,7 @@ initializeBlock(() => <MyExtension />);
 For detailed API documentation:
 - [extension-api.md](reference/extension-api.md) - SDK hooks and methods
 - [component-patterns.md](reference/component-patterns.md) - Common UI patterns
+- [interface-extensions-workflow.md](reference/interface-extensions-workflow.md) - Interface extensions development workflow, troubleshooting, and checklists
 
 ## Quick Patterns
 
@@ -237,11 +238,21 @@ try {
 
 ---
 
-## Interface Extensions (Alpha SDK)
+## Interface Extensions (Open Beta SDK)
 
-The newer Interface Extensions SDK has different patterns. Use `@airtable/blocks: interface-alpha` in package.json.
+Interface Extensions let you embed custom React apps directly into Airtable interfaces. Unlike regular Blocks SDK extensions (which live in a base-level sidebar), interface extensions are embedded as components within Interface Designer pages.
+
+**Plan requirement:** Team, Business, or Enterprise.
 
 ### Key Differences from Blocks SDK
+
+| Feature | Blocks SDK | Interface Extensions SDK |
+|---------|-----------|------------------------|
+| Import path | `@airtable/blocks/ui` | `@airtable/blocks/interface/ui` |
+| Where it runs | Base sidebar | Inside an interface page |
+| Data access | All tables/fields in base | Only tables/fields enabled in interface Data panel |
+| Multiple tables | Full base access | No native multi-table; use Web API as workaround |
+| Package.json | `@airtable/blocks` | `@airtable/blocks: interface-alpha` |
 
 ```jsx
 // Interface Extensions SDK uses different import path!
@@ -251,13 +262,63 @@ import { initializeBlock, useBase, useRecords } from '@airtable/blocks/interface
 // import { useBase, useRecords } from '@airtable/blocks/ui';
 ```
 
+### Interface Extensions Data Source Configuration
+
+**This is the #1 cause of "missing table" and "missing field" errors.** Interface extensions can ONLY access tables and fields that are explicitly added to the interface's Data panel. This is different from the Blocks SDK, where your code can see the entire base.
+
+#### Pre-Flight Checklist (Run BEFORE coding)
+
+Before writing any code or running `block run`, verify this configuration:
+
+- [ ] Open the interface in **edit mode** (click "Edit" at top)
+- [ ] Select the page containing your custom extension
+- [ ] In the **right panel**, find the **Data** section
+- [ ] Click the **gear icon** next to each table name
+- [ ] **Enable every table** your extension code references (via `getTableByName` or `getTableById`)
+- [ ] For **each enabled table**, click the gear icon next to **Fields**
+- [ ] **Enable every field** your code reads or writes (by name or ID)
+- [ ] If using linked records, enable the linked table AND its fields too
+- [ ] Save the interface configuration
+
+**The golden rule:** If your code touches it, the interface must expose it.
+
+#### Diagnostic Pattern
+
+Add this to your extension to see exactly what data is available:
+
+```jsx
+function DataDiagnostic() {
+  const base = useBase();
+
+  return (
+    <Box padding={3}>
+      <Heading size="small">Available Data Sources</Heading>
+      {base.tables.map(table => (
+        <Box key={table.id} marginTop={2}>
+          <Text fontWeight="bold">{table.name} ({table.id})</Text>
+          <Box marginLeft={3}>
+            {table.fields.map(field => (
+              <Text key={field.id} fontSize="small">
+                {field.name} ({field.id}) — {field.type}
+              </Text>
+            ))}
+          </Box>
+        </Box>
+      ))}
+    </Box>
+  );
+}
+```
+
+If a table or field you expect is missing from this output, it hasn't been enabled in the interface Data panel.
+
 ### Interface Extensions Troubleshooting
 
-#### "Field does not exist" Error
+#### "Field does not exist" / "Table not found" Error
 
-**Problem:** `Error: Field 'fldXXX' does not exist in table 'TableName'`
+**Problem:** `Error: Field 'fldXXX' does not exist in table 'TableName'` or your code can't find a table that definitely exists in the base.
 
-**Cause:** Interface Extensions require you to explicitly enable tables AND fields in the interface Data settings.
+**Cause:** Interface Extensions can only see tables and fields that are explicitly enabled in the interface's Data panel. This is the most common development gotcha.
 
 **Solution:**
 1. Open the interface in edit mode
@@ -266,20 +327,111 @@ import { initializeBlock, useBase, useRecords } from '@airtable/blocks/interface
 4. Enable all tables your extension uses
 5. For each table, click the gear icon next to **Fields**
 6. Enable all fields your code references (by ID or name)
+7. **Save the interface** — changes don't take effect until saved
 
-**Important:** Even if a field exists in the base, your extension can't access it unless it's enabled in the interface Data settings.
+**Important:** Even if a field exists in the base, your extension can't access it unless it's enabled in the interface Data settings. This applies to ALL field access — reading, writing, and even checking if a field exists.
+
+**Pro tip:** When adding new fields to your code, always add them to the interface Data panel FIRST, then update your code. Otherwise `block run` will crash with a confusing error.
 
 #### "FORBIDDEN - Can only run in original base" Error
 
 **Problem:** `You can only run your development block in the original base where it was created.`
 
-**Cause:** The dev server (`block run`) is tied to the specific base ID in `.block/remote.json`.
+**Cause:** The dev server (`block run`) is tied to the specific base ID stored in `.block/remote.json`.
 
 **Solution:**
 - Run the dev server while viewing the **original base** where you initialized the extension
 - OR use the **published release** (click "Stop" on development panel) which works in any base
+- Check `.block/remote.json` to verify the base ID matches where you're running it
 
-#### Best Practice: Use Field IDs, Not Names
+#### Multiple Tables Limitation
+
+**Problem:** Interface Extensions SDK doesn't natively support accessing multiple tables.
+
+**Workaround:** Use the Airtable Web API to read from other tables:
+
+```jsx
+// Use fetch with the Airtable REST API for secondary tables
+const fetchLinkedRecords = async (tableId) => {
+  const response = await fetch(
+    `https://api.airtable.com/v0/${baseId}/${tableId}`,
+    { headers: { Authorization: `Bearer ${apiToken}` } }
+  );
+  return response.json();
+};
+```
+
+### Development Server (`block run`) Guide
+
+The `block run` command starts a local dev server that hot-reloads your extension code inside Airtable. It's powerful but can be fragile.
+
+#### Starting Development
+
+```bash
+# Start the dev server
+block run
+
+# The server runs on localhost (usually port 9000)
+# Airtable loads your code from this local server
+```
+
+After running `block run`:
+1. Go to your Airtable interface in the browser
+2. Find your extension → click "Edit extension"
+3. Enter the localhost URL shown in your terminal
+4. Your extension loads from your local machine
+
+#### When `block run` Crashes
+
+The dev server can crash during hot-reload, especially with:
+- Syntax errors in JSX
+- Import errors (missing modules)
+- Large file saves that trigger multiple rapid reloads
+- Node.js memory issues on complex extensions
+
+**Recovery steps:**
+1. `Ctrl+C` to kill the crashed server (if it's hung, `Ctrl+C` twice)
+2. Check terminal output for the actual error
+3. Fix the code error that caused the crash
+4. Run `block run` again
+5. **Refresh the Airtable browser tab** — the extension iframe may have a stale connection
+6. If the extension shows "Connection error", the server isn't running — restart it
+
+**Prevention tips:**
+- Save files one at a time (avoid "save all" with many changed files)
+- Keep the terminal visible to catch errors early
+- If the server crashes repeatedly on startup, delete `node_modules` and reinstall:
+  ```bash
+  rm -rf node_modules && npm install && block run
+  ```
+
+#### Chrome/Browser Compatibility
+
+Chrome's strict security can block the local dev server:
+
+**Problem:** "Connection error. Please check if your local block is running" — but the server IS running.
+
+**Cause:** Chrome's CORS policy blocks localhost connections from Airtable's domain.
+
+**Solutions (try in order):**
+1. Check `chrome://flags` → search for "localhost" → enable "Allow invalid certificates for resources loaded from localhost"
+2. If that flag is hidden/expired, enable "Temporarily unexpire M130 flags" first, relaunch Chrome, then set the localhost flag
+3. Try Firefox as a workaround (more permissive with localhost)
+4. Last resort: launch Chrome with `--disable-web-security` using a separate profile:
+   ```bash
+   # macOS
+   open -na "Google Chrome" --args --disable-web-security --user-data-dir=/tmp/chrome-dev
+   ```
+   **Only use this for development.** Never browse normally with web security disabled.
+
+#### Alternative: Omni-Generated Extensions
+
+For quick prototyping, you can ask Airtable's Omni AI to generate a basic custom interface extension, then click "Edit Source" to modify the code directly — bypassing the CLI setup entirely. Good for:
+- Quick experiments
+- Learning the API by reading generated code
+- Extensions that don't need a local dev workflow
+
+### Best Practice: Use Field IDs, Not Names
 
 Field names can change. Field IDs are stable. Always use IDs in production code:
 
@@ -302,7 +454,7 @@ export function mapRecordToEvent(record) {
 }
 ```
 
-#### Publishing Releases
+### Publishing Releases
 
 ```bash
 # Publish with a release comment
