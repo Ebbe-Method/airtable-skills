@@ -238,6 +238,10 @@ If `airtable_use_field_ids: true`, after creating fields:
 
 7. **Field names can change** - Always prefer field IDs in scripts/integrations for stability.
 
+8. **Count, Lookup, and Rollup fields support conditional filtering** - All three field types have a "Only include linked records that meet certain conditions" toggle in the UI with a full condition builder. Use this for filtered counting instead of binary formula + SUM rollup workarounds. **The API does NOT expose these filter conditions** — don't assume they're absent.
+
+9. **Cannot delete fields or tables via API** - No delete capability exists. Never offer to delete fields — always tell the user which fields to remove in the Airtable UI instead.
+
 ## Dynamic Documentation
 
 For the latest Airtable features, you can fetch current documentation:

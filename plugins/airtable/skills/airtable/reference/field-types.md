@@ -24,7 +24,7 @@ Complete reference for all Airtable field types, their API support, and emoji ma
 | Rating | [star] | Yes | Yes | 1-10 scale |
 | Formula | [formula] | **No** | **No** | Use workaround |
 | Rollup | [rollup] | **No** | **No** | Use workaround |
-| Count | [count] | Yes | Limited | Counts linked records |
+| Count | [count] | Yes | Limited | Counts linked records (supports conditional filtering) |
 | Lookup | [lookup] | **No** | **No** | Use workaround |
 | Created time | [created] | Yes | No | Auto-populated |
 | Last modified time | [modified] | Yes | No | Auto-populated |
@@ -34,6 +34,20 @@ Complete reference for all Airtable field types, their API support, and emoji ma
 | Barcode | [barcode] | Yes | Yes | Barcode/QR |
 | Button | [button] | Limited | Limited | Triggers actions |
 | Link to another record | [link] | Yes | Yes | Related records |
+
+## Conditional Filtering on Count, Lookup, and Rollup Fields
+
+**Count, Lookup, and Rollup fields all support conditional filtering** on linked records in the Airtable UI. This is configured via:
+
+> "Only include linked records from [Table] that meet certain conditions"
+
+This toggle enables a full condition builder (field + operator + value) with AND/OR groups.
+
+**Example:** A Count field on Companies that counts linked Properties where `Aging Bucket` is "Past Due" — gives a filtered count of only past-due properties, not all linked properties.
+
+**Important:** The Airtable API (`describe_table`) does **NOT** expose these filter conditions. The API only shows the base field type and linked record field ID. Do not assume filters are absent just because the API doesn't show them.
+
+**This eliminates the need for workarounds** like "binary formula + SUM rollup" patterns for filtered counting. Use Count fields with conditions directly instead.
 
 ## Fields That Cannot Be Created via API
 
@@ -339,6 +353,12 @@ Formats: `h:mm`, `h:mm:ss`, `h:mm:ss.S`, `h:mm:ss.SS`, `h:mm:ss.SSS`
 }
 ```
 Button actions are limited via API - typically configured in UI.
+
+## Fields That Cannot Be Deleted via API
+
+**The Airtable API and MCP have no delete field or delete table capability.** Fields and tables can only be deleted in the Airtable UI.
+
+**Never offer or propose to delete fields via API.** When fields need to be removed, provide the user with a list of field names and IDs to delete manually in the UI.
 
 ## Recommended Standard Fields
 
